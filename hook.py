@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 from bot import WhatsApp
 from environment import get_env
 # from flask import Flask, request, make_response
-from fastapi import FastAPI, HTTPException, Response
+from fastapi import FastAPI, HTTPException, Response, Query, Request
 from pydantic import BaseModel
 from flow_handler import FlowHandler
 import json
@@ -14,7 +14,12 @@ from environment import get_env
 # app = Flask(__name__)
 app = FastAPI()
 # Load .env file
-messenger = WhatsApp(os.getenv("TOKEN"), phone_number_id=os.getenv("PHONE_NUMBER_ID"))
+messenger = WhatsApp(
+    # os.getenv("TOKEN"), 
+    "EAATeJpf9VKUBO4MHZBAW5ILbcuZCU71RQDZAR0Rk8AwdRCeJapdR2jVhxAFe4qQ2smuZCMAEx9eM11ny1HML8mRR1kXlgdNQ6m0jWekHZAdOZAJWqNMNyEcZAjcXsieXFjJFA6jwEWopMstZAtoDzoXP9iZBqVETxWwbCwGIvrMcZBGqp0ayBQmf3BRdNWojdYtFE2ZCr7FvhQNQbp4TB1dbAcZD",
+    phone_number_id='40791379697'
+    # phone_number_id=os.getenv("PHONE_NUMBER_ID")
+    )
 VERIFY_TOKEN = "30cca545-3838-48b2-80a7-9e43b1ae8ce4"
 
 # Logging
@@ -25,29 +30,34 @@ logging.basicConfig(
 flow_handler = FlowHandler(settings = json.load(open(get_env("SETTINGS_FILE_PATH"), "r", encoding="utf-8"))
 )
 @app.get("/")
-async def verify_token(hub_verify_token: str = None, hub_challenge: str = None):
-    if hub_verify_token == VERIFY_TOKEN:
+async def verify_token(hub_verify_token: str = Query(None, alias="hub.verify_token"), hub_challenge: str = Query(None, alias="hub.challenge"), hub_mode: str = Query(None, alias="hub.mode")):
+    print(hub_verify_token)
+    print(VERIFY_TOKEN)
+    if hub_verify_token == VERIFY_TOKEN and hub_mode == "subscribe":
+        print("Verified webhook")
         logging.info("Verified webhook")
         return Response(content=hub_challenge, media_type="text/plain")
     else:
         logging.error("Webhook Verification failed")
         raise HTTPException(status_code=400, detail="Invalid verification token")
 
-class Item(BaseModel):
-    object: str
-    entry: list | None = None
+
 
 
 @app.post("/")
-async def hook(item: Item):
+async def hook(request: Request = None):
+    if request is None:
+        print("Request is None")
+        return "OK"
+    data = await request.json()
+    # data = json.loads(raw_json)
     # Handle Webhook Subscriptions
-    data = {"object": item.object, "entry": item.entry}
     logging.info("Received webhook data: %s", data)
     changed_field = messenger.changed_field(data)
     if changed_field == "messages":
         new_message = messenger.is_message(data)
         if new_message:
-            mobile = messenger.get_mobile(data)
+            mobile = messenger.get_mobile(data) 
             name = messenger.get_name(data)
             message_type = messenger.get_message_type(data)
             logging.info(
