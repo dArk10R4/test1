@@ -28,6 +28,7 @@ class WhatsApp(object):
             token[str]: Token for the WhatsApp cloud API obtained from the developer portal
             phone_number_id[str]: Phone number id for the WhatsApp cloud API obtained from the developer portal
         """
+        print(token, phone_number_id)
         self.token = token
         self.phone_number_id = phone_number_id
         self.base_url = "https://graph.facebook.com/v14.0"
