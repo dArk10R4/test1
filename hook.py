@@ -15,10 +15,8 @@ from environment import get_env
 app = FastAPI()
 # Load .env file
 messenger = WhatsApp(
-    # os.getenv("TOKEN"), 
-    "EAATeJpf9VKUBO4MHZBAW5ILbcuZCU71RQDZAR0Rk8AwdRCeJapdR2jVhxAFe4qQ2smuZCMAEx9eM11ny1HML8mRR1kXlgdNQ6m0jWekHZAdOZAJWqNMNyEcZAjcXsieXFjJFA6jwEWopMstZAtoDzoXP9iZBqVETxWwbCwGIvrMcZBGqp0ayBQmf3BRdNWojdYtFE2ZCr7FvhQNQbp4TB1dbAcZD",
-    phone_number_id='40791379697'
-    # phone_number_id=os.getenv("PHONE_NUMBER_ID")
+    os.getenv("TOKEN"), 
+    phone_number_id=os.getenv("PHONE_NUMBER_ID")
     )
 VERIFY_TOKEN = "30cca545-3838-48b2-80a7-9e43b1ae8ce4"
 
