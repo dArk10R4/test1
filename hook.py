@@ -65,7 +65,7 @@ async def hook(request: Request = None):
                 message = messenger.get_message(data)
                 name = messenger.get_name(data)
                 logging.info("Message: %s", message)
-                flow_handler.send_message(data)
+                flow_handler.handle_request(data)
 
 
             # elif message_type == "interactive":
