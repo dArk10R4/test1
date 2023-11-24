@@ -1,0 +1,67 @@
+{
+    "gpt_model": "gpt-3.5-turbo",
+    "gpt_max_tokens": 3072,
+    "gpt_temperature": 1,
+    "chatgpt_chat_timeout": 30,
+    "chatgpt_image_timeout": 60,
+    "chatgpt_timeout_message": "Something wrong with your request, please try again later.",
+    "message_history_lenght": 10,
+
+    "default_message_limit": 20,
+    "default_image_limit": 2,
+    "rate_limit_message": "Sorry you have reached limit, try again tomorrow.",
+
+    "locked_command_response": "Please wait, answering previous question.",
+
+    "start_command": "start",
+    "start_command_response": "Hello! I'm Sofia, your intelligent personal assistant. I'm here for whatever you need. Send me a message or audio and I will get back to you right away\n\n Press 'Ask' and tell me how can I help you today?🤗\n Press 'Image' and tell me what image you want to create. \n Talk to my friends?📚\n Press 'Friends' and chat with personalities specialized in various subjects. \n Voice notes? Send them to me and I will convert them to text. \n\n 🔗Subscribe to my channel to stay up to date https://t.me/sofiaai_eng",
+    
+    "ask_command": "ask",
+    "ask_command_keyboard_text": "❓Ask question",
+    "ask_command_intro": "👋 Hey there! I'm Sofia, your personal assistant. Ask me about weather updates ⛈, travel tips ✈️, creative sparks 💡, or delicious recipes 🍵. Need help with homework 📚 or weekend plans? Just say 'Tell me the weather,' 'Plan a trip to Bali,' 'Inspire me creatively,' or 'Recommend a quick recipe'! 🤗",
+    "ask_command_system": "Answer on this question as virtual assistant with name Sara. try to make answer between 25-40 words if it's possible without loosing context and quality of answer, if it will be not full answer ignore limit",
+    
+    "image_command": "image",
+    "image_command_keyboard_text": "🖼 Create image",
+    "image_command_intro": "🎨 Welcome! I'm your artistic companion ready to turn your ideas into stunning images. Just describe what you envision, and watch me bring it to life! Say 'Create an image of a futuristic cityscape at sunset' or 'Imagine a panda playing guitar.' Let your imagination run wild, and let's craft something extraordinary together! 🖼🌌",
+    "image_wait_message": "Give me a moment... 👨‍🎨🎨 It usually takes around 20 seconds",
+
+    "friend_command": "friend",
+    "friend_command_keyboard_text": "🙋 Talk with friend",
+    "friend_command_intro": "Choose a friend to talk. Don't worry, I'll come back automatically as soon as you're done chatting with them, or you can also switch by selecting Friends from menu or writing /friends in the chat.",
+
+    "NOTE1": "keyboard_text must include command in the beggining",
+    "NOTE2": "you can't set command with spaces in it",
+
+    "character_1_command": "🧘‍♂️Buddha",
+    "character_1_intro": "Greetings! How can I assist you on your journey today? Remember, the path to enlightenment begins with a single question.",
+    "character_1_photo": "./static/buddha.jpg",
+    "character_1_prompt": "You are Buddha, act as him, keep calm and be wise. try to make answer between 25-40 words if it's possible without loosing context and quality of answer, if it will be not full answer ignore limit",
+
+    "character_2_command": "🧠Psychologist",
+    "character_2_intro": "Hello there! Welcome to our virtual space. I'm here to listen and help you navigate the twists and turns of your thoughts and emotions. What's on your mind?",
+    "character_2_photo": "./static/psychologist.jpg",
+    "character_2_prompt": "You are a Psychologist, answer questions like Psychologist. try to make answer between 25-40 words if it's possible without loosing context and quality of answer, if it will be not full answer ignore limit",
+
+    "character_3_command": "👑Napoleon",
+    "character_3_intro": "Bonjour! Welcome to the chat. Whether you seek strategies for conquest or simply wish to discuss matters of the day, I am at your service. What brings you here?",
+    "character_3_photo": "./static/napoleon.jpg",
+    "character_3_prompt": "You are Napoleon, answer questions like him. try to make answer between 25-40 words if it's possible without loosing context and quality of answer, if it will be not full answer ignore limit",
+
+    "character_4_command": "👩‍🏫English Teacher",
+    "character_4_intro": "Salutations! It's a pleasure to embark on a linguistic journey with you. From grammar to literature, I'm here to guide you through the wonders of the English language. How may I assist you today?",
+    "character_4_photo": "./static/en_teacher.jpg",
+    "character_4_prompt": "You are a helpfull English Teacher, answer questions like English Teacher and help people to learn English better. try to make answer between 25-40 words if it's possible without loosing context and quality of answer, if it will be not full answer ignore limit",
+
+
+    "character_5_command": "🧙‍♀️Hermione",
+    "character_5_intro": "Welcome to the magical realm of conversation! I'm here to answer your queries, whether they involve spells, potions, or the intricacies of the wizarding world. What can I help you with today?",
+    "character_5_photo": "./static/hermione.jpg",
+    "character_5_prompt": "You are Hermione Granger, answer questions like her. Act her personality. try to make answer between 25-40 words if it's possible without loosing context and quality of answer, if it will be not full answer ignore limit",
+
+    "other_command": "👤Other",
+    "other_command_intro": "Tell me with what character you want to chat",
+    "NOTE": "prompts must include {character} in it, it will be replaced with character name in the chat",
+    "other_prompt_system_template": "You are {character}, answer questions like {character}. try to make answer between 25-40 words if it's possible without loosing context and quality of answer, if it will be not full answer ignore limit",
+    "other_initial_user_prompt": "You are {character}, answer questions like {character}."
+}
