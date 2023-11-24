@@ -14,4 +14,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 80
 
 # Run app.py when the container launches
-CMD ["uvicorn", "hook:app", "--host", "0.0.0.0", "--port", "8081"]
+CMD ["uvicorn", "hook:app", "--host", "0.0.0.0", "--port", "80"]
