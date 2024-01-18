@@ -10,7 +10,7 @@ class User(Base):
     __tablename__ = 'users'
 
     phone_number = Column(String, primary_key=True)
-    message_type = Column(Enum('ask', 'image', 'friend', name='messagetype'), nullable=False)
+    message_type = Column(Enum('ask', 'image', 'friend', name='messagetype'), nullable=True)
     username = Column(String)
     chat_id = Column(String)
     country_code = Column(String)
@@ -33,7 +33,7 @@ class Message(Base):
     id = Column(Integer, primary_key=True)
     user_phone_number = Column(String, ForeignKey('users.phone_number'))
     content = Column(String)
-    message_type = Column(Enum('ask', 'image', 'friend', name='messagetype'), nullable=False)  # New field
+    message_type = Column(Enum('ask', 'image', 'friend', name='messagetype'), nullable=True)  # New field
     created_at = Column(DateTime)
 
 

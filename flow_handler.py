@@ -21,32 +21,33 @@ from io import BytesIO
 class FlowHandler():
     def __init__(self, settings: dict):
         self.messenger = WhatsApp(os.getenv("TOKEN"), phone_number_id=os.getenv("PHONE_NUMBER_ID"))
-        engine = create_engine('postgresql://postgress:mysecretpassword@localhost:5432/test')
+        engine = create_engine('postgresql://postgres:mysecretpassword@localhost:5432/test')
         Session = sessionmaker(bind=engine)
         self.session = Session()
-        self.TYPES = Enum("TYPES",["ask", "image", "friend"])
+        self.TYPES = ["ask", "image", "friend"]
         self.settings = settings
         self.gpt = AsyncOpenAI(api_key=get_env("OPENAI_API_KEY"))
+        print("OPENAI_API_KEY", get_env("OPENAI_API_KEY"))
 
 
 
-    def handle_request(self, data: dict):
+    async def handle_request(self, data: dict):
         phone_number = self.messenger.get_mobile(data)
         message = self.messenger.get_message(data)
         message_type = self.get_message_type(message)
-        user = self.session.query(User).filter("phone_number" == phone_number).first()
+        user = self.session.query(User).filter(User.phone_number==str(phone_number)).first()
         if user is None:
             self.handle_initialize_request(phone_number, message_type)
             return
-        
-        if message_type == self.TYPES.ask:
-            self.handle_ask_initialize_message(phone_number)
-        elif message_type == self.TYPES.image:
+
+        if message_type == "ask":
+            self.handle_ask_initialize_message(phone_number, user)
+        elif message_type == "image":
             self.handle_image_intialize_message(phone_number)
-        elif message_type == self.TYPES.friend:
+        elif message_type == "friend":
             self.handle_friend_initialize_request(data)
         else:
-            self.handle_request_message(message, phone_number)
+            await self.handle_request_message(message, phone_number, user)
 
 
     def send_message(self, data: dict):
@@ -55,6 +56,7 @@ class FlowHandler():
         self.messenger.send_message(f"Hi {name}, nice to connect with you", mobile)
     
     def handle_initialize_request(self, phone_number: str, message_type):
+        print("new user")
         new_user = User(
             phone_number=phone_number,
             # message_type='ask',
@@ -70,36 +72,34 @@ class FlowHandler():
             # utm_source='utm_source',
             # utm_medium='utm_medium',
             # utm_campaign='utm_campaign',
-            message_limit=self.settings["message_limit"],
-            image_limit=self.settings["image_limit"],
+            message_limit=self.settings["default_message_limit"],
+            image_limit=self.settings["default_image_limit"],
             total_image_generation=0
         )
         self.session.add(new_user)
         self.session.commit()
-        if message_type in None:
+        if message_type is None:
             pass
             # send initial message  
     
 
     def get_message_type(self, message: str):
+        
         if message in self.TYPES:
             return message
         return None
     
-    def handle_ask_initialize_message(self, phone_number: str):
-        user = self.session.query(User).filter("phone_number" == phone_number).first()
-        if user is None:
-            return
-        user.message_type = self.TYPES.ask
-        res = self.messenger.send_message("What do you want to ask?", phone_number)
-        if res.status_code == 200:
-            self.session.commit()
+    def handle_ask_initialize_message(self, phone_number: str, user):
+
+        user.message_type = "ask"
+        self.messenger.send_message("What do you want to ask?", phone_number)
+        self.session.commit()
     
     def handle_image_initialize_message(self, phone_number: str):
         user = self.session.query(User).filter("phone_number" == phone_number).first()
         if user is None:
             return
-        user.message_type = self.TYPES.image
+        user.message_type = "image"
         res = self.messenger.send_message("What do you want to draw?", phone_number)
         if res.status_code == 200:
             self.session.commit()
@@ -108,26 +108,24 @@ class FlowHandler():
         user = self.session.query(User).filter("phone_number" == phone_number).first()
         if user is None:
             return
-        user.message_type = self.TYPES.friend
+        user.message_type = "friend"
         res = self.messenger.send_message("What do you want to draw?", phone_number)
         if res.status_code == 200:
             self.session.commit()
 
-    def handle_request_message(self, message: str, phone_number: str):
-        user = self.session.query(User).filter("phone_number" == phone_number).first()
-        if user is None:
-            return
+    async def handle_request_message(self, message: str, phone_number: str, user):
         if user.message_limit <= user.total_messages:
             self.handle_limit_reached_message(message, phone_number)
             return
-        if user.message_type == self.TYPES.ask:
-            self.handle_ask_message(message, phone_number)
-        elif user.message_type == self.TYPES.image:
+        if user.message_type == "ask":
+            await self.handle_ask_message(message, phone_number)
+        elif user.message_type == "image":
             self.handle_image_message(message, phone_number)
-        elif user.message_type == self.TYPES.friend:
+        elif user.message_type == "friend":
             self.handle_friend_message(message, phone_number)
         else:
-            self.handle_default_message(message, phone_number)
+            pass
+            # self.handle_default_message(message, phone_number)
     
     def handle_default_message(self, message: str, phone_number: str):
         self.messenger.send_message("I don't understand", phone_number)
@@ -138,7 +136,8 @@ class FlowHandler():
 
     async def handle_ask_message(self, message: str, phone_number: str):
         try:
-            last_messages = self.session.query(Message).filter("user_phone_number" == phone_number).order_by("created_at").limit(self.settings["message_history_lenght"])
+            last_messages = self.session.query(Message).filter(Message.user_phone_number == str(phone_number)).order_by("created_at").limit(self.settings["message_history_lenght"]).all()
+
             messages = [
                     {
                         "role": "user",
@@ -154,6 +153,7 @@ class FlowHandler():
                 "role": "user",
                 "content": message
             })
+
             st = time.time()
             try:
                 gpt_response = await self.gpt.chat.completions.create(
@@ -184,9 +184,11 @@ class FlowHandler():
                     ],
                     tool_choice="auto",
                 )
+                print(gpt_response.choices[0].message.content, 187)
+                return
             except httpx.ReadTimeout:
                 self.messenger.send_message(self.settings["chatgpt_timeout_message"], phone_number)
-                # raise httpx.ReadTimeout("Gpt Timeout Error")
+                raise httpx.ReadTimeout("Gpt Timeout Error")
 
             if gpt_response.choices[0].finish_reason == "tool_calls":
                 if gpt_response.choices[0].message.tool_calls[0].function.name == "internet_search":
@@ -206,7 +208,7 @@ class FlowHandler():
                         "content": search_result,
                     })
                     new_message = Message(
-                        user_phone_number='1234567890',
+                        user_phone_number=phone_number,
                         content=search_result,
                         message_type='ask',
                         created_at=datetime.datetime.now()
@@ -225,14 +227,18 @@ class FlowHandler():
                     except httpx.ReadTimeout:
                         self.messenger.send_message(self.settings["chatgpt_timeout_message"], phone_number)
                         httpx.ReadTimeout("Gpt Timeout Error")
+
+                    # print(gpt_response.choices[0].message.content, 229)
+                    # return
                     self.session(User).filter("phone_number" == phone_number).first().total_messages += 1
                     self.session.commit()
+            # return
             # calculate elapsed time
             et = time.time() - st
             # return response to user
             # log assistant message
             new_message = Message(
-                user_phone_number='1234567890',
+                user_phone_number=phone_number,
                 content=gpt_response.choices[0].message.content,
                 message_type='ask',
                 created_at=datetime.datetime.now()
@@ -252,7 +258,7 @@ class FlowHandler():
     async def handle_image_message(self, message: str, phone_number: str):
         try:
             new_message = Message(
-                user_phone_number='1234567890',
+                user_phone_number=phone_number,
                 content=message,
                 message_type='image',
                 created_at=datetime.datetime.now()

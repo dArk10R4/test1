@@ -29,8 +29,8 @@ flow_handler = FlowHandler(settings = json.load(open(get_env("SETTINGS_FILE_PATH
 )
 @app.get("/")
 async def verify_token(hub_verify_token: str = Query(None, alias="hub.verify_token"), hub_challenge: str = Query(None, alias="hub.challenge"), hub_mode: str = Query(None, alias="hub.mode")):
-    print(hub_verify_token)
-    print(VERIFY_TOKEN)
+    # print(hub_verify_token)
+    # print(VERIFY_TOKEN)
     if hub_verify_token == VERIFY_TOKEN and hub_mode == "subscribe":
         print("Verified webhook")
         logging.info("Verified webhook")
@@ -45,7 +45,7 @@ async def verify_token(hub_verify_token: str = Query(None, alias="hub.verify_tok
 @app.post("/")
 async def hook(request: Request = None):
     if request is None:
-        print("Request is None")
+        # print("Request is None")
         return "OK"
     data = await request.json()
     # data = json.loads(raw_json)
@@ -65,7 +65,7 @@ async def hook(request: Request = None):
                 message = messenger.get_message(data)
                 name = messenger.get_name(data)
                 logging.info("Message: %s", message)
-                flow_handler.handle_request(data)
+                await flow_handler.handle_request(data)
 
 
             # elif message_type == "interactive":
